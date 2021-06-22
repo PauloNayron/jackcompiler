@@ -8,7 +8,6 @@ data class JackTokenizerImpl(
     var line: String,
     var currentToken: String? = null
 ): JackTokenizer {
-
     constructor(line: String) : this (
         line = line.split("//").get(0),
         currentToken = null
@@ -20,16 +19,13 @@ data class JackTokenizerImpl(
         if (this.hasMoreTokens()) {
             this.currentToken = REGEX.find(this.line)?.value
             this.line = this.currentToken?.let { this.line.replaceFirst(it, "") }.toString()
-            val tokenType = this.tokenType()
-            return tokenType.getToken(this.currentToken.toString())
+            return this.tokenType().getToken(this.currentToken.toString())
         }
         throw Exception("Não foi possível encontrar token")
     }
 
     override fun tokenType(): TokenType {
-        TokenType.values().forEach { tokenType ->
-            if (tokenType.regex.matches(this.currentToken.toString())) return tokenType
-        }
+        TokenType.values().forEach { tokenType -> if (tokenType.regex.matches(this.currentToken.toString())) return tokenType }
         throw Exception("Token Type não encontrado: ${this.currentToken}")
     }
 
