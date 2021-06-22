@@ -1,4 +1,3 @@
 package analisadorLexico
 
-interface Token {
-}
+abstract class Token (val token: String)

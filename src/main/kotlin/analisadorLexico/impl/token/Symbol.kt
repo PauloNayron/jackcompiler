@@ -6,5 +6,6 @@ import analisadorLexico.Token
 '{' | '}' | '(' | ')' | '[' | ']' | '. ' | ', ' | '; ' | '+' | '-' | '*' |
 '/' | '&' | '|' | '<' | '>' | '=' | '~'
 */
-class Symbol: Token {
+class Symbol(token: String) : Token(token) {
+    override fun toString() = "<symbol> ${this.token} </symbol>"
 }

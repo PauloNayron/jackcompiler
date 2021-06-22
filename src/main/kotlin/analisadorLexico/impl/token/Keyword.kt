@@ -9,5 +9,6 @@ import analisadorLexico.Token
 'null' | 'this' | 'let' | 'do' | 'if' | 'else' |
 'while' | 'return’
 */
-class Keyword: Token {
+class Keyword(token: String) : Token(token) {
+    override fun toString() = "<keyword> ${this.token} </keyword>"
 }
