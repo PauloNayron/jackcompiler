@@ -1,0 +1,5 @@
+package analisadorLexico
+
+interface JackTokenizer {
+
+}
