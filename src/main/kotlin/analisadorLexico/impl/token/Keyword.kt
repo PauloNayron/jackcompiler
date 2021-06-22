@@ -1,6 +1,7 @@
 package analisadorLexico.impl.token
 
 import analisadorLexico.Token
+import analisadorLexico.enums.TokenType
 
 /**
 'class' | 'constructor' | 'function' |
@@ -9,6 +10,10 @@ import analisadorLexico.Token
 'null' | 'this' | 'let' | 'do' | 'if' | 'else' |
 'while' | 'return’
 */
-data class Keyword(val token: String) : Token {
-    override fun toString() = "<keyword> ${this.token} </keyword>"
+data class Keyword(
+    val token: String,
+    val tokenType: TokenType = TokenType.KEYWORD,
+    val stringTag: String = "keyword"
+): Token {
+    override fun toString() = "<$stringTag> ${this.token} </$stringTag>"
 }

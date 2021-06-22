@@ -1,12 +1,17 @@
 package analisadorLexico.impl.token
 
 import analisadorLexico.Token
+import analisadorLexico.enums.TokenType
 
 /**
 '{' | '}' | '(' | ')' | '[' | ']' | '. ' | ', ' | '; ' | '+' | '-' | '*' |
 '/' | '&' | '|' | '<' | '>' | '=' | '~'
 */
-data class Symbol(val token: String) : Token {
+data class Symbol(
+    val token: String,
+    val tokenType: TokenType = TokenType.SYMBOL,
+    val stringTag: String = "symbol"
+): Token {
     fun token() = when(token) {
         "<" -> "&lt;"
         ">" -> "&gt;"
@@ -14,5 +19,5 @@ data class Symbol(val token: String) : Token {
         "&" -> "&amp;"
         else -> token
     }
-    override fun toString() = "<symbol> ${this.token()} </symbol>"
+    override fun toString() = "<$stringTag> ${this.token()} </$stringTag>"
 }
