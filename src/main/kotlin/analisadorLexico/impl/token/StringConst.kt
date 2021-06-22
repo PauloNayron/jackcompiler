@@ -5,6 +5,11 @@ import analisadorLexico.Token
 /*
 * "uma sequência de caracteres Unicode entre aspas dupla"
 * */
-class StringConst(token: String) : Token(token) {
-    override fun toString() = "<stringConst> ${this.token} </keyword>"
+data class StringConst(
+    val token: String
+): Token {
+
+    fun token() = this.token.replace("\"", "")
+
+    override fun toString() = "<stringConstant> ${this.token()} </stringConstant>"
 }

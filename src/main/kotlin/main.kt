@@ -6,12 +6,12 @@ fun readFileLineByLine (fileName: String) : Collection<String> = File(fileName).
 fun main(args: Array<String>) {
     val lines = readFileLineByLine("./src/main/resources/Main.jack")
 
-    println("<token>")
+    println("<tokens>")
     lines.forEach{ line ->
         val jackTokenizer = JackTokenizerImpl(line)
         while (jackTokenizer.hasMoreTokens()) {
             println(jackTokenizer.advance())
         }
     }
-    println("</token>")
+    println("</tokens>")
 }

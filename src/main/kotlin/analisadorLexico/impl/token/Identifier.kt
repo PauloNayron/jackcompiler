@@ -4,6 +4,6 @@ import analisadorLexico.Token
 /*
 * uma sequência de letras, digitos e undescore ( '_' ) não iniciando com um dígito.
 * */
-class Identifier(token: String) : Token(token) {
+data class Identifier(val token: String) : Token {
     override fun toString() = "<identifier> ${this.token} </identifier>"
 }

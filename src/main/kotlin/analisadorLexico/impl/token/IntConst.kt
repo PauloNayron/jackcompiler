@@ -5,6 +5,6 @@ import analisadorLexico.Token
 /*
 * um número decimal inteiro
 * */
-class IntConst(token: String) : Token(token) {
-    override fun toString() = "<intConst> ${this.token} </intConst>"
+data class IntConst(val token: String) : Token {
+    override fun toString() = "<integerConstant> ${this.token} </integerConstant>"
 }
