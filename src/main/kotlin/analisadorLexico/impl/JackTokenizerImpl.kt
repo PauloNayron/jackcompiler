@@ -3,7 +3,6 @@ package analisadorLexico.impl
 import analisadorLexico.JackTokenizer
 import analisadorLexico.Token
 import analisadorLexico.enums.TokenType
-import analisadorLexico.impl.token.*
 
 data class JackTokenizerImpl(
     var line: String,
@@ -22,13 +21,7 @@ data class JackTokenizerImpl(
             this.currentToken = REGEX.find(this.line)?.value
             this.line = this.currentToken?.let { this.line.replaceFirst(it, "") }.toString()
             val tokenType = this.tokenType()
-            when (tokenType) {
-                TokenType.KEYWORD -> return Keyword(this.currentToken.toString())
-                TokenType.SYMBOL -> return Symbol(this.currentToken.toString())
-                TokenType.IDENTIFIER -> return Identifier(this.currentToken.toString())
-                TokenType.INT_CONST -> return IntConst(this.currentToken.toString())
-                TokenType.STRING_CONST -> return StringConst(this.currentToken.toString())
-            }
+            return tokenType.getToken(this.currentToken.toString())
         }
         throw Exception("Não foi possível encontrar token")
     }
