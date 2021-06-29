@@ -4,7 +4,7 @@ import java.io.File
 fun readFileLineByLine (fileName: String) : Collection<String> = File(fileName).readLines().toList()
 
 fun main(args: Array<String>) {
-    val lines = readFileLineByLine("./src/main/resources/Main.jack")
+    val lines = readFileLineByLine("./src/main/resources/Square.jack")
 
     println("<tokens>")
     lines.forEach{ line ->

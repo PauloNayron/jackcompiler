@@ -9,7 +9,7 @@ data class JackTokenizerImpl(
     var currentToken: String? = null
 ): JackTokenizer {
     constructor(line: String) : this (
-        line = line.split("//").get(0),
+        line = line.split("//")[0],
         currentToken = null
     )
 
@@ -30,7 +30,7 @@ data class JackTokenizerImpl(
     }
 
     companion object {
-        val REGEX = "[0-9][0-9]*|[\\[]|[\\]]|[a-z][a-z]*|[aA-zZ_][aA0-zZ9_]*|[\"][aA-zZ_][aA0-zZ9_]*[ ]*[aA0-zZ9_]*[\"]|[(]|[)]|[<]|[>]|[=]|[{]|[}]|[\\/]{2}[/]*|[\\/]|[;]|[.]|[,]|[\\|]|[\\-]|[*]".toRegex()
+        val REGEX = "[0-9][0-9]*|[\\[]|[\\]]|[aA-zZ][aA-zZ]*|[aA-zZ_][aA0-zZ9_]*|[\"][aA-zZ_][aA0-zZ9_]*[ ]*[aA0-zZ9_]*[\"]|[(]|[)]|[<]|[>]|[=]|[{]|[}]|[\\/]{2}[/]*|[;]|[.]|[,]|[\\|]|[\\-]|[*]|[+]|[&]".toRegex()
     }
 }
 
