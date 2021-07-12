@@ -9,9 +9,11 @@ fun readFile (fileName: String) : String = File(fileName).readText()
 fun main(args: Array<String>) {
     val src = readFile("./src/main/resources/Main.jack")
     val jackTokenizer = JackTokenizerImpl(src)
-    /*while (jackTokenizer.hasMoreTokens()) {
+    /*
+    while (jackTokenizer.hasMoreTokens()) {
         println(jackTokenizer.advance())
-    }*/
+    }
+    */
 
     val compilationEngine = CompilationEngineImpl(jackTokenizer)
     compilationEngine.compileClass()

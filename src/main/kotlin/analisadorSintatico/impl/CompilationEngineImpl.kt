@@ -3,96 +3,119 @@ package analisadorSintatico.impl
 import analisadorLexico.Token
 import analisadorLexico.impl.JackTokenizerImpl
 import analisadorLexico.impl.token.Identifier
-import analisadorLexico.impl.token.Keyword
-import analisadorLexico.impl.token.Symbol
+import analisadorLexico.impl.token.IntConst
 import analisadorSintatico.CompilationEngine
+import analisadorSintatico.enums.LexicalElements
+import kotlin.concurrent.thread
 
 data class CompilationEngineImpl(
-    val jackTokenizer: JackTokenizerImpl,
-    private var tabs: String = ""
+    val jackTokenizer: JackTokenizerImpl
 ): CompilationEngine {
+
+    /**
+     *  'class' className '{' classVarDec* subroutineDec '}'
+     *  */
     override fun compileClass() {
-        printToken("<class/>")
-        this.tabs += "      "
-
-        printToken(jackTokenizer.advance().toString())
-        if(jackTokenizer.currentToken?.equals(Keyword("class"))!!) {
-            while (!jackTokenizer.currentToken?.equals(Symbol("{"))!!) {
-                printToken(jackTokenizer.advance().toString())
-            }
-        } else {
-            throw IllegalArgumentException("Um programa jack deve iniciar com uma classe.")
-        }
-
-        while (jackTokenizer.hasMoreTokens()) {
-            val token = jackTokenizer.advance()
-            if (subroutineDec(token)) this.compileSubroutine()
-            else printToken(jackTokenizer.currentToken.toString())
-        }
-
-        printToken(jackTokenizer.currentToken.toString())
-        this.tabs = this.tabs.replaceFirst("    ", "")
-        printToken("</class>")
-    }
-
-    override fun compileClassVarDec() {
-        TODO("Not yet implemented")
-    }
-
-    override fun compileSubroutine() {
-        printToken("<subroutineDec>")
-        this.tabs += "      "
-        while (!jackTokenizer.currentToken?.equals(Symbol("}"))!!) {
-            if (jackTokenizer.currentToken?.equals(Symbol("("))!!) this.compileParameterList()
-            else {
-                printToken(jackTokenizer.currentToken.toString())
-                if (jackTokenizer.hasMoreTokens()) jackTokenizer.advance()
-            }
-
-            if (jackTokenizer.currentToken?.equals(Symbol("{"))!!) {
-                printToken("<subroutineBody>")
-                this.tabs += "      "
-                printToken(jackTokenizer.currentToken.toString())
-
-                while (!jackTokenizer.currentToken!!.equals(Symbol("}"))) {
-                    if (jackTokenizer.currentToken!!.equals(Symbol("{"))) this.compileStatements()
-                    printToken(jackTokenizer.currentToken.toString())
-                    jackTokenizer.advance()
-                }
-
-                this.tabs = this.tabs.replaceFirst("    ", "")
-                printToken("</subroutineBody>")
-            }
-        }
-        this.tabs = this.tabs.replaceFirst("    ", "")
-        printToken("</subroutineDec>")
-    }
-
-    override fun compileParameterList() {
-        printToken(jackTokenizer.currentToken.toString())
-        printToken("<parameterList>")
-
+        openTag("class")
         jackTokenizer.advance()
-        while (!jackTokenizer.currentToken?.equals(Symbol(")"))!!) {
-            printToken(this.jackTokenizer.currentToken.toString())
-            if (jackTokenizer.hasMoreTokens()) jackTokenizer.advance()
+        tokenConsumer("class")
+
+        if (jackTokenizer.currentToken is Identifier) tokenConsumer()
+        else throw IllegalArgumentException("É espera um token Identifier, porém foi passado ${jackTokenizer.currentToken}")
+
+        tokenConsumer("{")
+
+        if (this.isClassVarDec()) this.compileClassVarDec()
+
+        if (this.isSubroutineDec()) this.compileSubroutine() else throw IllegalArgumentException("esperado token de subroutine")
+
+        tokenConsumer("}")
+
+        closeTag("class")
+    }
+
+    /**
+     * ('static'|'field') type varName (',' varName)*
+     * */
+    override fun compileClassVarDec() {
+        openTag("classVarDec")
+
+        // TODO - verificar implementação
+
+        closeTag("classVarDec")
+    }
+
+    /**
+     * ('construtor'|'function'|'method') ('void'|type) subroutineName
+     * '(' parameterList ')' subroutineBody
+     * */
+    override fun compileSubroutine() {
+        openTag("subroutineDec")
+        if (isSubroutineDec()) tokenConsumer() // ('construtor'|'function'|'method')
+
+        // ('void'|type)
+        if (jackTokenizer.currentToken?.getValue().equals("void") || isType()) tokenConsumer()
+        else throw IllegalArgumentException("É esperado um type, porém foi passado: ${jackTokenizer.currentToken}")
+
+        if (jackTokenizer.currentToken is Identifier) tokenConsumer() // subroutineName
+
+        tokenConsumer("(") // '('
+        this.compileParameterList()
+        tokenConsumer(")") // ')'
+
+        /** subroutineBody
+         * '{' varDec* statements '}'
+         * **/
+        openTag("subroutineBody")
+        tokenConsumer("{") // '{'
+        if (jackTokenizer.currentToken?.getValue().equals("var")) this.compileVarDec() // varDec*
+        this.compileStatements()
+        tokenConsumer("}") // '}'
+        closeTag("subroutineBody")
+
+        closeTag("subroutineDec")
+    }
+
+    /**
+     * ((type varName) (',' varName)*)?
+     * */
+    override fun compileParameterList() {
+        openTag("parameterList")
+        while (isType() && !jackTokenizer.currentToken?.getValue().equals(")")) {
+            tokenConsumer()
+            if (jackTokenizer.currentToken is Identifier) {
+                tokenConsumer()
+                if (jackTokenizer.currentToken?.getValue().equals(",")) {
+                    tokenConsumer()
+                }
+            } else {
+                throw IllegalArgumentException("É esperado um varName, pórem foi passado: ${jackTokenizer.currentToken}")
+            }
         }
-        printToken("</parameterList>")
+        closeTag("parameterList")
     }
 
     override fun compileVarDec() {
         TODO("Not yet implemented")
     }
 
+    /**
+     * statement*
+     * */
     override fun compileStatements() {
-        printToken("<statements>")
-        this.tabs += "      "
-        jackTokenizer.advance()
-        while (!jackTokenizer.currentToken!!.equals(Symbol("}"))) {
-            if (jackTokenizer.currentToken!!.equals(Keyword("return"))) this.compileReturn()
+        openTag("statements")
+
+        while (isStatement()) {
+            when (jackTokenizer.currentToken?.getValue()) {
+                "let" -> this.compileLet()
+                "if" -> this.compileIf()
+                "while" -> this.compileWhile()
+                "do" -> this.compileDo()
+                "return" -> this.compileReturn()
+            }
         }
-        this.tabs = this.tabs.replaceFirst("    ", "")
-        printToken("</statements>")
+
+        closeTag("statements")
     }
 
     override fun compileDo() {
@@ -103,59 +126,105 @@ data class CompilationEngineImpl(
         TODO("Not yet implemented")
     }
 
+    /**
+     * 'return' expression? ';'
+     * */
     override fun compileReturn() {
-        printToken("<returnStatement>")
-        this.tabs += "      "
-        printToken(jackTokenizer.currentToken.toString()) // printar o return
-        jackTokenizer.advance()
+        openTag("returnStatement")
+        tokenConsumer("return") // 'return'
 
-        this.compileExpression()
+        if (!jackTokenizer.currentToken?.getValue().equals(";")) this.compileExpression() // expression?
 
-        if(this.jackTokenizer.currentToken!!.equals(Symbol(";"))) {
-            printToken(this.jackTokenizer.currentToken.toString())
-            jackTokenizer.advance()
-        }
+        tokenConsumer(";")
 
-        this.tabs = this.tabs.replaceFirst("      ", "")
-        printToken("</returnStatement>")
+        closeTag("returnStatement")
     }
+
 
     override fun compileIf() {
         TODO("Not yet implemented")
     }
 
+    override fun compileWhile() {
+        TODO("Not yet implemented")
+    }
+
+    /**
+     * term (op term)*
+     * */
     override fun compileExpression() {
-        printToken("<expression>")
-        this.tabs += "      "
+        openTag("expression")
 
         this.compileTerm()
 
-        this.tabs = this.tabs.replaceFirst("      ", "")
-        printToken("</expression>")
-    }
-
-    override fun compileTerm() {
-        printToken("<term>")
-        this.tabs += "      "
-
-        when(jackTokenizer.currentToken) {
-            is Identifier -> {
-                printToken(jackTokenizer.currentToken.toString())
-                jackTokenizer.advance()
-            }
+        if(isOp()) {
+            tokenConsumer()
+            this.compileTerm()
         }
 
-        this.tabs = this.tabs.replaceFirst("      ", "")
-        printToken("</term>")
+        closeTag("expression")
+    }
+
+
+    override fun compileTerm() {
+        openTag("term")
+        if (isTerm()) tokenConsumer() else throw IllegalArgumentException("esperado um Term, porém foi passado: ${jackTokenizer.currentToken}")
+        closeTag("term")
     }
 
     override fun compileExpressionList() {
         TODO("Not yet implemented")
     }
 
-    private fun printToken(message: String) = println("${this.tabs}${message}")
+    private fun tokenConsumer(token: String) {
+        if (jackTokenizer.currentToken?.getValue().equals(token)) {
+            printToken(jackTokenizer.currentToken)
+            try {
+                jackTokenizer.advance()
+            } catch (ex: java.lang.IllegalArgumentException) {
+                if (!token.equals("}") && !jackTokenizer.hasMoreTokens()) {
+                    println(ex)
+                }
+            }
+        } else {
+            throw IllegalArgumentException("foi esperado ${token}, porém foi passado ${jackTokenizer.currentToken}")
+        }
+    }
+
+    private fun tokenConsumer() {
+        printToken(jackTokenizer.currentToken)
+        jackTokenizer.advance()
+    }
+
+    private fun isClassVarDec(): Boolean = LexicalElements.CLASS_VAR_DEC.elements
+        .contains(jackTokenizer.currentToken?.getValue())
+
+    private fun isSubroutineDec(): Boolean = LexicalElements.SUBROUTINE_DEC.elements
+        .contains(jackTokenizer.currentToken?.getValue())
+
+    private fun isType(): Boolean = LexicalElements.TYPE.elements.contains(jackTokenizer.currentToken?.getValue()) ||
+                jackTokenizer.currentToken is Identifier
+
+    private fun isStatement(): Boolean = LexicalElements.STATEMENT.elements.contains(jackTokenizer.currentToken?.getValue())
+
+    private fun isTerm(): Boolean = jackTokenizer.currentToken is Identifier || jackTokenizer.currentToken is IntConst
+
+    private fun isOp(): Boolean = LexicalElements.OP.elements.contains(jackTokenizer.currentToken?.getValue())
 
     companion object {
-        fun subroutineDec(token: Token): Boolean = token.equals(Keyword(token = "method"))
+        private var tab = ""
+
+        private fun openTag(tag: String) {
+            println("${tab}<${tag}>")
+            tab += "    "
+        }
+
+        private fun closeTag(tag: String) {
+            tab = tab.replaceFirst("    ", "")
+            println("${tab}</${tag}>")
+        }
+
+        private fun printToken(token: Token?) = println("${tab}${token}")
+
     }
 }

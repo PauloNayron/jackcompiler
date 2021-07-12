@@ -31,6 +31,8 @@ interface CompilationEngine {
     /* Compiles an if statement, possibly with a trailing else clause. */
     fun compileIf()
 
+    fun compileWhile()
+
     /* Compila uma expressão. */
     fun compileExpression()
 
