@@ -19,5 +19,5 @@ interface JackTokenizer {
     * Retorna o tipo do token corrente (keyword,symbol, identifier ... )
     * Usualmente implementado por um enumerate em linguagens estáticas
     * */
-    fun tokenType(): TokenType
+    fun tokenType(tokenValue: String): Token
 }

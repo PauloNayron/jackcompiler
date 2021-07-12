@@ -12,6 +12,8 @@ data class Symbol(
     val tokenType: TokenType = TokenType.SYMBOL,
     val stringTag: String = "symbol"
 ): Token {
+    override fun getValue(): String = this.token
+
     fun token() = when(token) {
         "<" -> "&lt;"
         ">" -> "&gt;"

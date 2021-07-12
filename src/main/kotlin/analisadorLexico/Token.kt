@@ -1,3 +1,5 @@
 package analisadorLexico
 
-interface Token
+interface Token {
+    fun getValue(): String
+}

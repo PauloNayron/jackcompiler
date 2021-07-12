@@ -1,4 +1,5 @@
 import analisadorLexico.impl.JackTokenizerImpl
+import analisadorSintatico.impl.CompilationEngineImpl
 import java.io.File
 
 fun readFileLineByLine (fileName: String) : Collection<String> = File(fileName).readLines().toList()
@@ -6,12 +7,12 @@ fun readFileLineByLine (fileName: String) : Collection<String> = File(fileName).
 fun readFile (fileName: String) : String = File(fileName).readText()
 
 fun main(args: Array<String>) {
-    println("<tokens>")
-    val src = readFile("./src/main/resources/Square.jack")
+    val src = readFile("./src/main/resources/Main.jack")
     val jackTokenizer = JackTokenizerImpl(src)
-
-    while (jackTokenizer.hasMoreTokens()) {
+    /*while (jackTokenizer.hasMoreTokens()) {
         println(jackTokenizer.advance())
-    }
-    println("</tokens>")
+    }*/
+
+    val compilationEngine = CompilationEngineImpl(jackTokenizer)
+    compilationEngine.compileClass()
 }

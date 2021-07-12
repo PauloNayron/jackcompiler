@@ -3,17 +3,17 @@ package analisadorLexico.impl
 import analisadorLexico.JackTokenizer
 import analisadorLexico.Token
 import analisadorLexico.enums.TokenType
+import java.lang.IllegalArgumentException
 import java.lang.NullPointerException
 
 data class JackTokenizerImpl(
     var line: String = "",
     var count: Int = 1,
     var mapLines: Map<Int, String>?,
-    var currentToken: String? = null
+    var currentToken: Token? = null
 ): JackTokenizer {
     constructor(src: String) : this (
-        mapLines = exec(src),
-        currentToken = null
+        mapLines = exec(src)
     )
 
     override fun hasMoreTokens(): Boolean {
@@ -30,15 +30,16 @@ data class JackTokenizerImpl(
 
     override fun advance(): Token {
         if (this.hasMoreTokens()) {
-            this.currentToken = REGEX.find(this.line)?.value
-            this.line = this.currentToken?.let { this.line.replaceFirst(it, "") }.toString()
-            return this.tokenType().getToken(this.currentToken.toString())
+            val valueToken = REGEX.find(this.line)?.value
+            this.line = valueToken?.let { this.line.replaceFirst(it, "") }.toString()
+            this.currentToken = valueToken?.let { this.tokenType(it) }
+            return this.currentToken!!
         }
-        throw Exception("Não foi possível encontrar token")
+        throw IllegalArgumentException("Não foi possível encontrar token.")
     }
 
-    override fun tokenType(): TokenType {
-        TokenType.values().forEach { tokenType -> if (tokenType.regex.matches(this.currentToken.toString())) return tokenType }
+    override fun tokenType(tokenValue: String): Token {
+        TokenType.values().forEach { tokenType -> if (tokenType.regex.matches(tokenValue)) return tokenType.getToken(tokenValue) }
         throw Exception("Token Type não encontrado: ${this.currentToken}")
     }
 

@@ -11,6 +11,8 @@ data class StringConst(
     val tokenType: TokenType = TokenType.STRING_CONST,
     val stringTag: String = "stringConstant"
 ): Token {
+    override fun getValue(): String = this.token
+
     fun token() = this.token.replace("\"", "")
     override fun toString() = "<$stringTag> ${this.token()} </$stringTag>"
 }

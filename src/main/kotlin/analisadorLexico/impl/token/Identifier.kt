@@ -11,5 +11,7 @@ data class Identifier(
     val tokenType: TokenType = TokenType.IDENTIFIER,
     val stringTag: String = "identifier"
 ): Token {
+    override fun getValue(): String = this.token
+
     override fun toString() = "<$stringTag> ${this.token} </$stringTag>"
 }
