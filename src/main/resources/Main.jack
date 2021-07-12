@@ -6,7 +6,9 @@
 // (derived from projects/09/Square/Main.jack, with testing additions)
 
 class Main {
-    method int getx() {
-        return x;
+    method void teste() {
+        while (count < 100) {
+            let count = count + 1;
+        }
     }
 }

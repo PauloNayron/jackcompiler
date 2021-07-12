@@ -6,7 +6,6 @@ import analisadorLexico.impl.token.Identifier
 import analisadorLexico.impl.token.IntConst
 import analisadorSintatico.CompilationEngine
 import analisadorSintatico.enums.LexicalElements
-import kotlin.concurrent.thread
 
 data class CompilationEngineImpl(
     val jackTokenizer: JackTokenizerImpl
@@ -145,8 +144,19 @@ data class CompilationEngineImpl(
         TODO("Not yet implemented")
     }
 
+    /**
+     * 'while' '(' expression ')' '{' statements '}'
+     * */
     override fun compileWhile() {
-        TODO("Not yet implemented")
+        openTag("whileStatement")
+        tokenConsumer("while")
+        tokenConsumer("(")
+        this.compileExpression()
+        tokenConsumer(")")
+        tokenConsumer("{")
+        this.compileStatements()
+        tokenConsumer("}")
+        closeTag("whileStatement")
     }
 
     /**
@@ -157,7 +167,7 @@ data class CompilationEngineImpl(
 
         this.compileTerm()
 
-        if(isOp()) {
+        while(isOp()) {
             tokenConsumer()
             this.compileTerm()
         }
@@ -202,14 +212,16 @@ data class CompilationEngineImpl(
     private fun isSubroutineDec(): Boolean = LexicalElements.SUBROUTINE_DEC.elements
         .contains(jackTokenizer.currentToken?.getValue())
 
-    private fun isType(): Boolean = LexicalElements.TYPE.elements.contains(jackTokenizer.currentToken?.getValue()) ||
-                jackTokenizer.currentToken is Identifier
+    private fun isType(): Boolean = LexicalElements.TYPE.elements
+        .contains(jackTokenizer.currentToken?.getValue()) || jackTokenizer.currentToken is Identifier
 
-    private fun isStatement(): Boolean = LexicalElements.STATEMENT.elements.contains(jackTokenizer.currentToken?.getValue())
+    private fun isStatement(): Boolean = LexicalElements.STATEMENT.elements
+        .contains(jackTokenizer.currentToken?.getValue())
 
     private fun isTerm(): Boolean = jackTokenizer.currentToken is Identifier || jackTokenizer.currentToken is IntConst
 
-    private fun isOp(): Boolean = LexicalElements.OP.elements.contains(jackTokenizer.currentToken?.getValue())
+    private fun isOp(): Boolean = LexicalElements.OP.elements
+        .contains(jackTokenizer.currentToken?.getValue())
 
     companion object {
         private var tab = ""
