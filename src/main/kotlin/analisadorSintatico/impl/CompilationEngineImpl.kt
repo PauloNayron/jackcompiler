@@ -4,6 +4,7 @@ import analisadorLexico.Token
 import analisadorLexico.impl.JackTokenizerImpl
 import analisadorLexico.impl.token.Identifier
 import analisadorLexico.impl.token.IntConst
+import analisadorLexico.impl.token.Keyword
 import analisadorSintatico.CompilationEngine
 import analisadorSintatico.enums.LexicalElements
 
@@ -19,7 +20,7 @@ data class CompilationEngineImpl(
         jackTokenizer.advance()
         tokenConsumer("class")
 
-        if (jackTokenizer.currentToken is Identifier) tokenConsumer()
+        if (isVarName()) tokenConsumer()
         else throw IllegalArgumentException("É espera um token Identifier, porém foi passado ${jackTokenizer.currentToken}")
 
         tokenConsumer("{")
@@ -34,12 +35,21 @@ data class CompilationEngineImpl(
     }
 
     /**
-     * ('static'|'field') type varName (',' varName)*
+     * ('static'|'field') type varName (',' varName)* ';'
      * */
     override fun compileClassVarDec() {
         openTag("classVarDec")
 
-        // TODO - verificar implementação
+        if (isClassVarDec()) tokenConsumer() else IllegalArgumentException("Esperado 'static'|'field', porém foi passado: ${jackTokenizer.currentToken}")
+        compileType()
+        compileVarName()
+
+        while (jackTokenizer.currentToken?.getValue().equals(",")) {
+            tokenConsumer(",")
+            compileVarName()
+        }
+
+        tokenConsumer(";")
 
         closeTag("classVarDec")
     }
@@ -56,7 +66,7 @@ data class CompilationEngineImpl(
         if (jackTokenizer.currentToken?.getValue().equals("void") || isType()) tokenConsumer()
         else throw IllegalArgumentException("É esperado um type, porém foi passado: ${jackTokenizer.currentToken}")
 
-        if (jackTokenizer.currentToken is Identifier) tokenConsumer() // subroutineName
+        if (isVarName()) tokenConsumer() // subroutineName
 
         tokenConsumer("(") // '('
         this.compileParameterList()
@@ -82,7 +92,7 @@ data class CompilationEngineImpl(
         openTag("parameterList")
         while (isType() && !jackTokenizer.currentToken?.getValue().equals(")")) {
             tokenConsumer()
-            if (jackTokenizer.currentToken is Identifier) {
+            if (isVarName()) {
                 tokenConsumer()
                 if (jackTokenizer.currentToken?.getValue().equals(",")) {
                     tokenConsumer()
@@ -94,8 +104,20 @@ data class CompilationEngineImpl(
         closeTag("parameterList")
     }
 
+    /**
+     * 'var' type varName (',' varName)* ';'
+     * */
     override fun compileVarDec() {
-        TODO("Not yet implemented")
+        openTag("varDec")
+        tokenConsumer("var")
+        this.compileType()
+        this.compileVarName()
+        while (jackTokenizer.currentToken?.getValue().equals(",")) {
+            tokenConsumer(",")
+            this.compileVarName()
+        }
+        tokenConsumer(";")
+        closeTag("varDec")
     }
 
     /**
@@ -117,12 +139,37 @@ data class CompilationEngineImpl(
         closeTag("statements")
     }
 
+    /**
+     * 'do' subroutineCall ';'
+     * */
     override fun compileDo() {
-        TODO("Not yet implemented")
+        openTag("doStatement")
+        tokenConsumer("do")
+        // TODO - implementar
+        closeTag("closeStatement")
     }
 
+    /**
+     * 'let' varName ('[' expression ']')? '=' expression ';'
+     * */
     override fun compileLet() {
-        TODO("Not yet implemented")
+        openTag("letStatement")
+        this.tokenConsumer("let")
+
+        if (this.isVarName()) tokenConsumer()
+        else throw IllegalArgumentException("Esperado um varName, porém foi passdo: ${jackTokenizer.currentToken}")
+
+        if (jackTokenizer.currentToken?.getValue().equals("[")) {
+            tokenConsumer("[")
+            this.compileExpression()
+            tokenConsumer("]")
+        }
+
+        tokenConsumer("=")
+        this.compileExpression()
+        tokenConsumer(";")
+
+        closeTag("letStatement")
     }
 
     /**
@@ -139,9 +186,25 @@ data class CompilationEngineImpl(
         closeTag("returnStatement")
     }
 
-
+    /**
+     * 'if' '(' expression ')' '{' statements '}' ('else' '{' statements '}')?
+     * */
     override fun compileIf() {
-        TODO("Not yet implemented")
+        openTag("ifStatement")
+        tokenConsumer("if")
+        tokenConsumer("(")
+        this.compileExpression()
+        tokenConsumer(")")
+        tokenConsumer("{")
+        this.compileStatements()
+        tokenConsumer("}")
+        if (jackTokenizer.currentToken?.getValue().equals("else")) {
+            tokenConsumer("else")
+            tokenConsumer("{")
+            this.compileStatements()
+            tokenConsumer("}")
+        }
+        closeTag("ifStatement")
     }
 
     /**
@@ -175,7 +238,6 @@ data class CompilationEngineImpl(
         closeTag("expression")
     }
 
-
     override fun compileTerm() {
         openTag("term")
         if (isTerm()) tokenConsumer() else throw IllegalArgumentException("esperado um Term, porém foi passado: ${jackTokenizer.currentToken}")
@@ -184,6 +246,14 @@ data class CompilationEngineImpl(
 
     override fun compileExpressionList() {
         TODO("Not yet implemented")
+    }
+
+    private fun compileVarName() {
+        if (isVarName()) tokenConsumer() else IllegalArgumentException("Esperado token do tipo varName, porém foi passado: ${jackTokenizer.currentToken}")
+    }
+
+    private fun compileType() {
+        if (isType()) tokenConsumer() else IllegalArgumentException("Esperado token do tipo type, porém foi passado: ${jackTokenizer.currentToken}")
     }
 
     private fun tokenConsumer(token: String) {
@@ -213,12 +283,14 @@ data class CompilationEngineImpl(
         .contains(jackTokenizer.currentToken?.getValue())
 
     private fun isType(): Boolean = LexicalElements.TYPE.elements
-        .contains(jackTokenizer.currentToken?.getValue()) || jackTokenizer.currentToken is Identifier
+        .contains(jackTokenizer.currentToken?.getValue()) || isVarName()
 
     private fun isStatement(): Boolean = LexicalElements.STATEMENT.elements
         .contains(jackTokenizer.currentToken?.getValue())
 
-    private fun isTerm(): Boolean = jackTokenizer.currentToken is Identifier || jackTokenizer.currentToken is IntConst
+    private fun isTerm(): Boolean = isVarName() || jackTokenizer.currentToken is IntConst || jackTokenizer.currentToken is Keyword
+
+    private fun isVarName() = jackTokenizer.currentToken is Identifier
 
     private fun isOp(): Boolean = LexicalElements.OP.elements
         .contains(jackTokenizer.currentToken?.getValue())
@@ -237,6 +309,5 @@ data class CompilationEngineImpl(
         }
 
         private fun printToken(token: Token?) = println("${tab}${token}")
-
     }
 }

@@ -6,9 +6,13 @@
 // (derived from projects/09/Square/Main.jack, with testing additions)
 
 class Main {
+    static int teste;
     method void teste() {
-        while (count < 100) {
-            let count = count + 1;
+        var int compileVarDecA;
+        if (count > 100) {
+            return true;
+        } else {
+            return false;
         }
     }
 }
