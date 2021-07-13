@@ -5,5 +5,7 @@ enum class LexicalElements (val elements: Array<String>) {
     SUBROUTINE_DEC(arrayOf("constructor", "function", "method")),
     TYPE(arrayOf("int", "char", "boolean")),
     STATEMENT(arrayOf("let", "if", "while", "do", "return")),
-    OP(arrayOf("+", "-", "*", "/", "&", "|", "<", ">", "="))
+    OP(arrayOf("+", "-", "*", "/", "&", "|", "<", ">", "=")),
+    KEYWORD_CONSTANT(arrayOf("true", "false", "null", "this")),
+    UNARY_OP(arrayOf("-", "~"))
 }

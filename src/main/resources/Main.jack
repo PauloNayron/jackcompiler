@@ -6,13 +6,14 @@
 // (derived from projects/09/Square/Main.jack, with testing additions)
 
 class Main {
-    static int teste;
-    method void teste() {
-        var int compileVarDecA;
-        if (count > 100) {
-            return true;
-        } else {
-            return false;
+    method void moveDown() {
+        if ((y + size) < 254) {
+            do Screen.setColor(false);
+            do Screen.drawRectangle(x, y, x + size, y + 1);
+            let y = y + 2;
+            do Screen.setColor(true);
+            do Screen.drawRectangle(x, (y + size) - 1, x + size, y + size);
         }
+        return;
     }
 }
