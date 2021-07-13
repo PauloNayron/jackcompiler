@@ -44,7 +44,7 @@ data class JackTokenizerImpl(
     }
 
     companion object {
-        val REGEX = "[0-9][0-9]*|[\\[]|[\\]]|[aA-zZ][aA-zZ]*|[aA-zZ_][aA0-zZ9_]*|[\"][aA-zZ_][aA0-zZ9_]*[ ]*[aA0-zZ9_]*[\"]|[(]|[)]|[<]|[>]|[=]|[{]|[}]|[\\/]{2}[/]*|[;]|[.]|[,]|[\\|]|[\\-]|[*]|[+]|[&]".toRegex()
+        val REGEX = "[0-9][0-9]*|[\\[]|[\\]]|[aA-zZ][aA-zZ]*|[aA-zZ_][aA0-zZ9_]*|[\"][aA-zZ_][aA0-zZ9_]*[ ]*[aA0-zZ9_]*[\"]|[(]|[)]|[<]|[>]|[=]|[{]|[}]|[\\/]{2}[/]*|[;]|[.]|[,]|[\\|]|[\\-]|[*]|[+]|[&]|[~]".toRegex()
 
         fun exec (src: String): Map<Int, String> {
             val lines = src.split("\n")
