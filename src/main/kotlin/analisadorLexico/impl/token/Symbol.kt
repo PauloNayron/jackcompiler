@@ -9,10 +9,12 @@ import analisadorLexico.enums.TokenType
 */
 data class Symbol(
     val token: String,
+    val linha: Int = 0,
     val tokenType: TokenType = TokenType.SYMBOL,
     val stringTag: String = "symbol"
 ): Token {
     override fun getValue(): String = this.token
+    override fun getLine(): Int = this.linha
 
     fun token() = when(token) {
         "<" -> "&lt;"

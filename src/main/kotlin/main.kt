@@ -10,7 +10,7 @@ fun readFile (fileName: String) : String = File(fileName).readText()
 
 fun main(args: Array<String>) {
     val dir = "./src/main/resources/"
-    val nameFile = "SquareGame.jack"
+    val nameFile = "Square.jack"
     val name = nameFile.split(".")[0]
     val src = readFile("${dir}$nameFile")
 

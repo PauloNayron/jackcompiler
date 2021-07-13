@@ -39,7 +39,7 @@ data class JackTokenizerImpl(
     }
 
     override fun tokenType(tokenValue: String): Token {
-        TokenType.values().forEach { tokenType -> if (tokenType.regex.matches(tokenValue)) return tokenType.getToken(tokenValue) }
+        TokenType.values().forEach { tokenType -> if (tokenType.regex.matches(tokenValue)) return tokenType.getToken(tokenValue, count) }
         throw Exception("Token Type não encontrado: ${this.currentToken}")
     }
 

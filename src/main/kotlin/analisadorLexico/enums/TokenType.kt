@@ -10,11 +10,11 @@ enum class TokenType(val regex: Regex) {
     INT_CONST(Regex("[0-9][0-9]*")),
     STRING_CONST(Regex("[\"][aA-zZ_][aA0-zZ9_]*[ ]*[aA0-zZ9_]*[\"]"));
 
-    fun getToken(currentToken: String): Token = when (this) {
-        KEYWORD -> Keyword(currentToken)
-        SYMBOL -> Symbol(currentToken)
-        IDENTIFIER -> Identifier(currentToken)
-        INT_CONST -> IntConst(currentToken)
-        STRING_CONST -> StringConst(currentToken)
+    fun getToken(currentToken: String, line: Int = 0): Token = when (this) {
+        KEYWORD -> Keyword(currentToken, line)
+        SYMBOL -> Symbol(currentToken, line)
+        IDENTIFIER -> Identifier(currentToken, line)
+        INT_CONST -> IntConst(currentToken, line)
+        STRING_CONST -> StringConst(currentToken, line)
     }
 }

@@ -8,10 +8,12 @@ import analisadorLexico.enums.TokenType
 * */
 data class Identifier(
     val token: String,
+    val linha: Int = 0,
     val tokenType: TokenType = TokenType.IDENTIFIER,
     val stringTag: String = "identifier"
 ): Token {
     override fun getValue(): String = this.token
+    override fun getLine(): Int = this.linha
 
     override fun toString() = "<$stringTag> ${this.token} </$stringTag>"
 }

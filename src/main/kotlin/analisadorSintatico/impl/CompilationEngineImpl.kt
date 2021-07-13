@@ -313,7 +313,7 @@ data class CompilationEngineImpl(
                 }
             }
         } else {
-            throw IllegalArgumentException("foi esperado ${token}, porém foi passado ${jackTokenizer.currentToken}")
+            throw IllegalArgumentException("foi esperado ${token}, porém foi passado ${jackTokenizer.currentToken} :: linha ${jackTokenizer.currentToken?.getLine()}")
         }
     }
 
