@@ -211,21 +211,9 @@ data class CompilationEngineImpl(
     }
 
     /**
-     * term (op term)*
+     * integerConstant | stringConstant | keywordConstant | varName |
+     * varName '[' expression ']' | subroutineCall | '(' expression ')' | unaryOp term
      * */
-    override fun compileExpression() {
-        xml.openTag("expression")
-
-        this.compileTerm()
-
-        while(isOp()) {
-            tokenConsumer()
-            this.compileTerm()
-        }
-
-        xml.closeTag("expression")
-    }
-
     override fun compileTerm() {
         xml.openTag("term")
         if (isTerm()) tokenConsumer() // integerConstant | stringConstant | keywordConstant
@@ -259,11 +247,28 @@ data class CompilationEngineImpl(
     }
 
     /**
+     * term (op term)*
+     * */
+    override fun compileExpression() {
+        xml.openTag("expression")
+
+        this.compileTerm()
+
+        while(isOp()) {
+            tokenConsumer()
+            this.compileTerm()
+        }
+
+        xml.closeTag("expression")
+    }
+
+    /**
      * (expression (',' expression)* )?
      * */
     override fun compileExpressionList() {
         xml.openTag("expressionList")
-        while (isTerm() || jackTokenizer.currentToken is Identifier) {
+        while (isTerm() || jackTokenizer.currentToken is Identifier ||
+            jackTokenizer.currentToken?.getValue().equals("(")) {
             this.compileExpression()
             while (jackTokenizer.currentToken?.getValue().equals(",")) {
                 tokenConsumer(",")
