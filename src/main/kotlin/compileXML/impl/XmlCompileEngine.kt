@@ -37,6 +37,6 @@ class XmlCompileEngine(
 
     private fun printMessage(message: String) {
         this.xml += message + "\n"
-        println(message)
+//        println(message)
     }
 }
